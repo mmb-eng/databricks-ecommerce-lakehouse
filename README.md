@@ -73,7 +73,7 @@ purchase
 
 The source does not provide a trustworthy unique `event_id`, so potential duplicate-looking events are retained rather than blindly removed.
 
-> Dataset files are intentionally not committed to this repository because of their size. Add the original dataset URL/source here if you want the repository to link directly to it.
+> Dataset files are intentionally not committed to this repository because of their size.
 
 ## Medallion Layers
 
@@ -197,11 +197,7 @@ data_quality_checks
 
 The workflow demonstrates task dependencies, retry behavior, failure propagation, and checkpointed incremental execution.
 
-Add a screenshot of the implemented DAG when available:
-
-```md
 ![Lakeflow Job DAG](assets/lakeflow_job_dag.png)
-```
 
 
 ## Databricks AI/BI Dashboard
