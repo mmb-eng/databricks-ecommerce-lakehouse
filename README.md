@@ -1,6 +1,6 @@
 # E-commerce Lakehouse Platform
 
-Production-style **Databricks lakehouse processing 42.4M+ e-commerce events** with PySpark, Delta Lake, Auto Loader, Structured Streaming, incremental Gold upserts, automated data-quality checks, and Lakeflow Jobs orchestration.
+Production-style **Databricks lakehouse processing 42.4M+ e-commerce events** with PySpark, Delta Lake, Auto Loader, Structured Streaming, incremental Gold upserts, automated data-quality checks, Lakeflow Jobs orchestration, and a Databricks AI/BI analytics dashboard.
 
 ![E-commerce Lakehouse Architecture](assets/lakehouse_architecture.png)
 
@@ -16,6 +16,7 @@ Production-style **Databricks lakehouse processing 42.4M+ e-commerce events** wi
 - Added Silver validation, quarantine, lineage metadata, and business-aware quality flags
 - Added automated freshness, grain, sanity, and Silver-to-Gold reconciliation checks
 - Orchestrated the workflow as a 4-task **Lakeflow Job**
+- Built a **Databricks AI/BI Dashboard** on curated Gold tables for event, purchase, revenue, customer-activity, and product-performance analytics
 - Validated incremental behavior with a **1.33M-event daily batch** without duplicating historical Gold records
 
 ## Architecture
@@ -202,6 +203,32 @@ Add a screenshot of the implemented DAG when available:
 ![Lakeflow Job DAG](assets/lakeflow_job_dag.png)
 ```
 
+
+## Databricks AI/BI Dashboard
+
+The curated Gold tables serve an interactive **Databricks AI/BI Dashboard**, keeping the BI layer separated from raw Bronze and Silver data.
+
+Dashboard source tables:
+
+```text
+daily_funnel_metrics
+daily_revenue_metrics
+product_daily_performance
+```
+
+The dashboard includes:
+
+- Total Events, Cart Events, Purchase Events, and Purchased-Item Revenue KPIs
+- daily event-volume trends
+- daily carts vs. purchases
+- customer-activity and revenue analysis
+- product-performance rankings
+- interactive event-date filtering
+
+The dashboard intentionally consumes **Gold** rather than scanning Bronze or Silver, so visualizations use curated business-ready grains and precomputed metrics.
+
+![Gold Analytics Dashboard](assets/gold_dashboard.png)
+
 ## Incremental Validation
 
 The incremental design was validated by adding a new daily file after the initial pipeline was already populated.
@@ -269,7 +296,7 @@ databricks-ecommerce-lakehouse/
 
 ## Technologies
 
-**Databricks · PySpark · Apache Spark · Spark Structured Streaming · Delta Lake · Auto Loader · Lakeflow Jobs · Unity Catalog · SQL · Python**
+**Databricks · PySpark · Apache Spark · Spark Structured Streaming · Delta Lake · Auto Loader · Lakeflow Jobs · Databricks AI/BI Dashboards · Unity Catalog · SQL · Python**
 
 ## Data Engineering Concepts Demonstrated
 
@@ -320,14 +347,14 @@ Manual Spark DataFrame caching (`cache` / `persist`) was intentionally removed b
 
 Development-only inspection cells were removed from the GitHub notebooks. Production validation is handled through automated assertions in the data-quality task.
 
+The Databricks AI/BI Dashboard reads from curated Gold tables rather than Bronze or Silver, keeping transformation logic and analytical consumption cleanly separated.
+
 ## Future Enhancements
 
-- Databricks SQL dashboard
-- Lakeflow Job DAG screenshot
-- dashboard screenshot
 - alerting / notification refinement
 - more advanced observability
 - controlled backfill workflow
+- additional Gold business metrics where justified by source semantics
 
 ## License
 

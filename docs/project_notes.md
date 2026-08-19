@@ -22,6 +22,7 @@ Main goals:
 - automated data-quality checks
 - retry-safe processing
 - production-style debugging
+- analytical serving through Databricks AI/BI Dashboards
 
 Final dataset scale:
 
@@ -582,7 +583,90 @@ checkpointed incremental execution
 
 Quality checks use deterministic assertions and therefore do not benefit from blind retry when the underlying data itself is invalid.
 
-## 22. Incremental Day-5 Validation
+
+## 22. Databricks AI/BI Dashboard
+
+After the core pipeline and Lakeflow Job were working, an interactive **Databricks AI/BI Dashboard** was built directly on the curated Gold tables.
+
+Dashboard sources:
+
+```text
+ecommerce_lakehouse.gold.daily_funnel_metrics
+ecommerce_lakehouse.gold.daily_revenue_metrics
+ecommerce_lakehouse.gold.product_daily_performance
+```
+
+This preserves the intended serving architecture:
+
+```text
+Bronze   → raw / replayable data
+Silver   → trusted granular events
+Gold     → business-ready analytical datasets
+Dashboard → consumption / visualization
+```
+
+The dashboard does not query Bronze or Silver directly.
+
+### Overview metrics
+
+The Overview page includes:
+
+```text
+Total Events
+Cart Events
+Purchase Events
+Purchased-Item Revenue
+Daily Event Volume
+Daily Carts & Purchases
+```
+
+An interactive `event_date` range filter allows analysis over a selected period.
+
+### Product analysis
+
+The product-level Gold dataset supports rankings such as:
+
+```text
+Top products by purchased-item revenue
+Top products by purchases
+Top products by views
+```
+
+### Dashboard metric semantics
+
+The dashboard keeps business labels aligned with the actual source grain.
+
+For example:
+
+```text
+Purchased-Item Revenue
+```
+
+is preferred over an unsupported order-level metric because the source does not contain a reliable `order_id`.
+
+Event-count ratios are also not presented as strict user/session conversion probabilities.
+
+### Why use Gold as the dashboard source?
+
+Gold tables provide:
+
+```text
+stable grain
+curated business metrics
+smaller analytical datasets
+consistent semantics
+lower query complexity for visualization
+```
+
+This keeps BI consumers away from raw ingestion details and Silver validation logic.
+
+A portfolio screenshot is stored as:
+
+```text
+assets/gold_dashboard.png
+```
+
+## 23. Incremental Day-5 Validation
 
 Before new input:
 
@@ -631,7 +715,7 @@ Gold MERGE behavior
 Gold grain preservation
 ```
 
-## 23. Important Interview Wording
+## 24. Important Interview Wording
 
 Prefer:
 
@@ -665,7 +749,7 @@ Avoid:
 
 > Purchases greater than carts means the pipeline is wrong.
 
-## 24. Skills Demonstrated
+## 25. Skills Demonstrated
 
 ```text
 Databricks
@@ -702,9 +786,12 @@ failure propagation
 serverless compute
 production debugging
 compute-cost awareness
+Databricks AI/BI Dashboards
+Gold serving layer
+interactive analytical filtering
 ```
 
-## 25. Repository Presentation
+## 26. Repository Presentation
 
 Recommended:
 
@@ -713,6 +800,9 @@ README.md
 project-notes.md
 notebooks/
 assets/
+  lakehouse_architecture.png
+  lakeflow_job_dag.png
+  gold_dashboard.png
 .gitignore
 LICENSE
 ```
@@ -730,7 +820,7 @@ temporary notebook exports
 .ipynb_checkpoints/
 ```
 
-## 26. Suggested `.gitignore`
+## 27. Suggested `.gitignore`
 
 ```gitignore
 # Dataset / generated data
@@ -761,7 +851,7 @@ venv/
 Thumbs.db
 ```
 
-## 27. Final Architecture Summary
+## 28. Final Architecture Summary
 
 ```text
 42.4M+ Daily E-commerce Events
@@ -779,10 +869,13 @@ Silver Validation + Quarantine
 Gold affected-date recomputation
             ↓
 foreachBatch + Delta MERGE
+            ├────────→ Databricks AI/BI Dashboard
+            │          Business analytics / consumption
             ↓
 Automated Data Quality
-            ↓
-Lakeflow Job
+
+Lakeflow Job orchestrates:
+Bronze → Silver → Gold → Data Quality
 ```
 
-The project demonstrates not only Databricks syntax, but the reasoning required to build, validate, debug, and incrementally operate a modern lakehouse pipeline.
+The project demonstrates not only Databricks syntax, but the reasoning required to build, validate, debug, incrementally operate, and serve analytics from a modern lakehouse pipeline.
